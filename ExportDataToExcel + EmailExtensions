@@ -1,0 +1,256 @@
+using System;
+using System.Net.Mail;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Excel;
+using _Excel = Microsoft.Office.Interop.Excel;
+using _Application = Microsoft.Office.Interop.Excel._Application;
+
+
+namespace ExportDataToExcel
+{
+    public partial class Form1 : Form
+    {
+        private _Application excelApp = new _Excel.Application();//Reference to app
+        private Workbook wb;//File opening
+        private Worksheet ws;//All sheets
+        //---------------------------------------------------------------------------------------------------------------------------------------
+        private bool _closing = false;
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Clocktimer.Start();
+
+            Show();
+
+            //Set 'Date' columnn to show current date
+            ScanDataGrid.Columns["Date"].DefaultCellStyle.NullValue = DateTime.Now.ToString("dd/MM/yyyy");
+
+            //Open Excel file
+            wb = excelApp.Workbooks.Open(@"C:\Users\GemmaThomas-Green\OneDrive - EFFECT Photonics\Kanban project\Kanban Sheet NEW testing.xlsx");
+
+            //See the Excel workbook
+            excelApp.Visible = true;
+
+            //Sheet 3
+            ws = wb.Worksheets[3];
+            ws.Activate();
+
+            ////Reads the WriteToCell method
+            //MessageBox.Show(ReadCell(164, 0));
+        }
+
+        private void ScanDataGrid_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridViewRow row = ScanDataGrid.Rows[e.RowIndex];
+
+            //Get the last used row
+            Range userRange = ws.UsedRange;
+            int LastRow = userRange.Rows.Count;
+            int add = LastRow + 1;
+
+            //If there is the default or more rows and no NULL values in the cells of first and third column of ScanDataGrid
+            if (e.RowIndex >= 0 && row.Cells["PartNumber"] != null && row.Cells["QuantityIssued"] != null)
+            {
+
+                try
+                {
+                    //'Part Number' column with last cell of Excel spreadsheet
+                    ws.Cells[add, "A"] = row.Cells["PartNumber"].Value.ToString();
+
+                    //'Date' column with last cell of Excel spreadsheet
+                    ws.Cells[add, "B"] = DateTime.Now.ToString("dd/MM/yyyy");
+                    //ws.Cells[add, 2].NumberFormat = ("dd/MM/yyyy");
+
+                    //'Quantity Issued' column with last cell of Excel spreadsheet
+                    ws.Cells[add, "C"] = row.Cells["QuantityIssued"].Value.ToString();
+
+                    //Save Excel file
+                    wb.Save();
+                }
+
+                catch
+                {
+                    MessageBox.Show("You must enter a value in the cell", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    TopMost = false;//MessageBox is on top
+                }
+            }
+            TopMost = true;//Kanban app is on top
+
+            //Save Excel file
+            wb.Save();
+            MessageBox.Show("Spreadsheet has been saved");
+
+            //----------------------------------------------------------------------------------------------------------------------------------------
+            var ws1 = wb.Worksheets[1];
+            var ws3 = wb.Worksheets[3];
+
+            //While the 'Part Number' in the ScanDataGrid value is the same as the last row in 'Material Issued' tab
+            string[] KBNumber = {
+                "EP-KB000001", "EP-KB000002", "EP-KB000003", "EP-KB000004", "EP-KB000005", "EP-KB000006", "EP-KB000007", "EP-KB000008", "EP-KB000009", "EP-KB000010",
+                "EP-KB000011", "EP-KB000012", "EP-KB000013", "EP-KB000014", "EP-KB000015", "EP-KB000016", "EP-KB000017", "EP-KB000018", "EP-KB000019", "EP-KB000020",
+                "EP-KB000021", "EP-KB000022", "EP-KB000023", "EP-KB000024", "EP-KB000025", "EP-KB000026", "EP-KB000027", "EP-KB000028", "EP-KB000029", "EP-KB000030",
+                "EP-KB000031", "EP-KB000032", "EP-KB000033", "EP-KB000034", "EP-KB000035", "EP-KB000036", "EP-KB000037", "EP-KB000038", "EP-KB000039", "EP-KB000040",
+                "EP-KB000041", "EP-KB000042", "EP-KB000043", "EP-KB000044", "EP-KB000045", "EP-KB000046", "EP-KB000047", "EP-KB000048", "EP-KB000049", "EP-KB000050",
+                "EP-KB000051", "EP-KB000052", "EP-KB000053", "EP-KB000054", "EP-KB000055", "EP-KB000056", "EP-KB000057", "EP-KB000058", "EP-KB000059", "EP-KB000060",
+                "EP-KB000061", "EP-KB000062", "EP-KB000063", "EP-KB000064", "EP-KB000065", "EP-KB000066", "EP-KB000067", "EP-KB000068", "EP-KB000069", "EP-KB000070",
+                "EP-KB000071", "EP-KB000072", "EP-KB000073", "EP-KB000074", "EP-KB000075", "EP-KB000076", "EP-KB000077", "EP-KB000078", "EP-KB000079", "EP-KB000080",
+                "EP-KB000081", "EP-KB000082", "EP-KB000083", "EP-KB000084", "EP-KB000085", "EP-KB000086", "EP-KB000087", "EP-KB000088", "EP-KB000089", "EP-KB000090",
+                "EP-KB000091", "EP-KB000092", "EP-KB000093", "EP-KB000094", "EP-KB000095", "EP-KB000096", "EP-KB000097", "EP-KB000098", "EP-KB000099", "EP-KB000100",
+                "EP-KB000101", "EP-KB000102", "EP-KB000103", "EP-KB000104", "EP-KB000105", "EP-KB000106", "EP-KB000107", "EP-KB000108", "EP-KB000109", "EP-KB000110",
+                "EP-KB000111", "EP-KB000112", "EP-KB000113", "EP-KB000114", "EP-KB000115", "EP-KB000116", "EP-KB000117", "EP-KB000118", "EP-KB000119", "EP-KB000120",
+                "EP-KB000121", "EP-KB000122", "EP-KB000123", "EP-KB000124", "EP-KB000125", "EP-KB000126", "EP-KB000127", "EP-KB000128", "EP-KB000129", "EP-KB000130",
+                "EP-KB000131", "EP-KB000132", "EP-KB000133", "EP-KB000134", "EP-KB000135", "EP-KB000136", "EP-KB000137", "EP-KB000138", "EP-KB000139", "EP-KB000140",
+                "EP-KB000141", "EP-KB000142", "EP-KB000143", "EP-KB000144", "EP-KB000145", "EP-KB000146", "EP-KB000147", "EP-KB000148", "EP-KB000149", "EP-KB000150",
+                "EP-KB000151", "EP-KB000152", "EP-KB000153", "EP-KB000154", "EP-KB000155", "EP-KB000156", "EP-KB000157", "EP-KB000158", "EP-KB000159", "EP-KB000160",
+                "EP-KB000161", "EP-KB000162", "EP-KB000163", "EP-KB000164", "EP-KB000165", "EP-KB000166", "EP-KB000167", "EP-KB000168", "EP-KB000169", "EP-KB000170",
+                "EP-KB000171", "EP-KB000172", "EP-KB000173", "EP-KB000174", "EP-KB000175", "EP-KB000176", "EP-KB000177", "EP-KB000178", "EP-KB000179", "EP-KB000180",
+                "EP-KB000181"
+            };
+
+            int[] ReOrderPoint = {
+                1, 5, 5, 10, 10, 10, 1, 1, 2, 2,
+                5000, 1, 1, 20, 2, 5, 10, 10, 1, 2,
+                10, 1, 5, 2, 2, 1, 2, 1, 2, 2,
+                5, 5, 10, 10, 5, 100, 40, 1, 2000, 100,
+                1, 100, 3, 1000, 2, 8, 1, 1, 200, 2,
+                5, 4, 2, 3, 5, 4000, 1, 3, 300, 4,
+                8, 4, 2, 100, 2, 5, 5, 6, 12, 5,
+                12, 15, 2, 1, 2, 30, 5, 4, 2, 2,
+                4, 25, 2, 2, 1, 1, 4, 2, 10, 1,
+                10, 2, 20, 20, 100, 1, 5, 3, 4, 3,
+                3, 3, 3, 2, 15, 1, 0, 5, 5, 5,
+                5, 6, 1, 1, 1, 25, 10, 3, 1, 1,
+                1, 200, 1, 1, 20, 2, 48, 0/*N/A*/, 0/*N/A*/, 0/*N/A*/,
+                0/*N/A*/, 0/*N/A*/, 8/*N/A*/, 0/*N/A*/, 2, 5, 10, 2, 2, 2,
+                2, 6, 2000, 1, 1, 1, 1, 5, 1, 1500,
+                200, 100, 10, 1, 1, 1, 4, 1, 1, 1,
+                5, 5, 2, 2, 2, 2, 3, 3, 3, 3
+            };
+
+            //string[] Description = {
+            //    "0.05 Hex Keys (609-590)",  "1-Click Connector Cleaner (MU/LC-CLK-C)", "23 Gauge Orange Dispense Tips (TE723050PK)", "27 Gauge Orange Dispense Tips (TTN27E)", "3cc Pneumatic piston (403L-7)", "3cc Syringe Barrel (403LL-1)", "3cc Syringe Plunger Rod (403L-4)", "Alcohol wipes (TEXWIPE1)", "Beard Snoods (PA5)",
+            //    "Bent Point Tweezers 7SA (192-2024)", "Black Boots Mk2", "Black Cable Ties, 300mm (233-487)", "Blade Remover (QFYUKSM)", "Bonding Capillary (SBN-35120-535E-ZP36T)", "BoroSilicate Crystallizing Dishes (11776592)", "Brother Printer Tape (157-2253)", "Conductive Storage Box (228 x 128 x 30mm) - SB5", "Conductive Storage Box (74 x 52 x 18mm) - SB2", "Cross Hatch Adhesion Test Tape (K0001539M001)",
+            //    "Dissipative Bottles (761-7169)",  "Dog-Waste Bags with Dispenser and Lead Clip, 300-count", "Dust Caps - Green (CAP07003)", "ESD Straps & Lead Kit (100-WS10-SSA)", "Fine Hook Tweezers (238-6205)", "Fine Point Tweezers (847-3077)", "Finger Cots (266-2896 )", "Glass Rods", "GMA Garnet Powder, 80 Mesh Fine (GMIGARN80-25Kg-1)", "IPA Isopropyl Alcohol Wipes (ADH1610-50)",
+            //    "Kapton Tape (436-2762)", "KIMTECH PURE G3 NXT Nitrile Gloves, Extra Large (62994)", "KIMTECH PURE G3 NXT Nitrile Gloves, Extra Small (62990)", "KIMTECH PURE G3 NXT Nitrile Gloves, Large (62993)", "KIMTECH PURE G3 NXT Nitrile Gloves, Medium (62992)", "KIMTECH PURE G3 NXT Nitrile Gloves, Small (62991)", "Kit Barrel/Piston 3CC CL/WH (7012074)", "Lint Free Wipes (CHW400C)", "Loctite 222 Screw Lock (537056)", "M1.4 x 5 Phillips Pan Machine Screw (A798501405H)",
+            //    "M2X3, Pozi, Pan, A2SS Self Finish Screws (TR00009713-000)", "Magnifying lenses", "Micro Bore Dispensing Tip - Orange (IDMSPREC-M100_NS)", "Microscope Slides (52-0277)", "Open Cell Foam ESD Swab (LTO70PESD20)", "Paddle Tweezers (847-3106)", "Patchcord, FC/PC-Master LC/PC. 2mm Sleeve, 1Mtr (PAT 036170)", "Pink Anti-Static Bag, 100mm x 150mm (LTP46)", "Pink Anti-Static Bag, 125mm x 200mm (LTP58)", "PP5 Plastic Pots and Lids (150250)",
+            //    "Round End Tweezers (457-4117)", "Safety Glasses (794-8643)", "Scalpel Blades 10A (847-7593)", "Scalpel Handles (850-079)", "Sharpes Box", "Propan-2-01/Isopropanaol (PROP-1214-22)", "Shoe Covers (1070453)", "Silicon Wafers (WSV60650500B1015XNN1)", "Single Edge Blade (247-5438)", "Smooth Flow Dispensing Tip - Black (FIS8001275)",
+            //    "Stirrers / Plastic Tooth Picks", "Tacky Mats (93183664B)", "Tacky Wipes (T4005)", "Ultragrade 19 Vacuum Pump Oil (H11025011)", "V3 BP Dummy Baseplate", "Wash Bottles, 250ml Capacity (2401-0250PK)", "Wirebond Capillary (SBN-35100-485E-ZP34T)", "Wirebond Capillary 25um (UTS-35HF-AZ-1/16-XL)", "Patchcord, LC/PC R: LC/PC R 2mm Sleeve, 1Mtr. (PAT045391)", "Label - 57.15 x 31.75mm (800262-125)",
+            //    "Label - 57.15 x 76.2mm (3014894-T)", "Label - 101.6 x 152.4mm (800264-605)", "3553 Adhesive", "930-4 Adhesive", "A174 Silane (UC50-404)", "Acetone (AECT-1195-22)", "Bondline 2258 Adhesive (2258XX-03E-010-FZ)", "Flat Foam Tip Cotton Bud (LTP70FESD)", "DIMER, DPX-C (980130-C-500GE)",
+            //    "Dymax OP-24 OPtical Adhesive (DYMOP24-B-3ML-MR)", "EK1000 Adhesive", "Gold Wire Soft (7384)", "H20E Adhesive", "LS1-3252 Silicone Gel (LS1-3252-2PINT)", "LS3140 Silicone Adhesive (LS-3410)", "Micro-90 Cleaning Solution (WZ-18100-05)", "Norland 123K Adhesive", "Norland 81 Adhesive (8010)", "Opticaly Clear Encapsulation Gel, LS-3140 (LS-3140 50GM)", "Optocast 3410XTP Adhesive",
+            //    "Latex Peelable Coating Mask (118-1403)", "TC50 Adhesive", "Ultrapure Water (WAUL-1232-29)", "Universal Jig Shelf", "Universal Jig Rod", "Universal Jig Spacer (05-66-201)", "Unversal Jig Nut (M6- HFA2-S100)", "Baffele Assembly (SA-018-1044-1)", "4L Sharpes Bins (787-3628)", "Disposable Heel Grounder 100 pack (HG0011000)",
+            //    "O-Ring (B50000-46)", "\"12\" Gasket (20077)", "Silicone O-Ring (20081)", "Viton O-Ring (20080)", "Scotch 27 Glass Cloth Elec Tape (PP-858-1001-0)", "A4 Cleanroom Notebook (600-2008)", "RS PRO Cleanroom Paper (829-5215)", "2'' Tray Clips STAT-PRO 100 (H20- 04B-61C02)", "Loctite 243 10ml Bottle (1835179)",
+            //    "Chisel Blades", "Premium Coil Cord 1.8m (CCJ10)", "CLETOP Connector Cleaning Tool (FCC-03R)", "CLETOP Replacement Tape A & B Blue (FCC-R)", "Bloc Visors", "White Premium Grade Self-Adhesive Vinyl (CPM01)", "Black Ribbon Refill (CPMR40)", "\"6\" (150mm) Single Flex Frame (eVT0302-eM-20-BLK-(P1))", "Bergeon Black Oiler (HO30102-N)", "DYMO Authentic LT Plastic Labels 12mm x 4m Roll (S0721610)", "Tajima Safe Snap Off Blade Disposal Unit (SS001/Y)",
+            //    "Bolle Lens Cleaning Fluid 500ml - 100-0779", "IPA Wipes (600-0012P)", "Flat Foam Tip Cotton Bud (LTP70FESD)", "Ribbon (80107181)", "Module Label (80458703)", "Scalpel Covers (2768907)", "RS Pro 130 ESD Fine Tweezers (136-9728)", "Patch Cord (SM-LCU-LCU-DX-FS-2M-PVC)", "Module Latch (Bag of 100)", "Module Bail (Tray of 100)",
+            //    "Stiffener (Bag of 100)", "Top Housing (Tray of 45)", "Bottom Housing ( Tray of 48)", "EMI Finger (Tray of 100)", "Interposer (Packs of 10)", "Safety Over Glasses (195-1551)", "ESD Pen (ASPN)", "Conductive Storage Boxes- (SB3-112X83X19)", "HP Office Jet Pro 963 (Black)", "HP Office Jet Pro 963 (Yellow)",
+            //    "HP Office Jet Pro 963 (Magenta)", "HP Office Jet Pro 963 (Cyan)", "Scotch Heavy Duty Packaging Tape, 66m x 50mm (6 pack)", "Dust Caps - Black (50022011080100)", "22 Gauge Blue Tip Nozzle (7018298)", "Syringe Barrel & Piston Set 5cc (7012096)", "Tip (Nozzle) Cap (7012198)", "End Cap 5cc (7012192)", "Dust Caps - Black (34921) - EXACT", "300 PCS Lint Free Wipes",
+            //    "Capacitors (GRM155R71C104KA88D)", "A18213-04 T-Flex (SF10 1.0mm Set 55.5 x 15mm)", "Plastic Packaging Clamshell Box (57514)", "Module Packing Boxes (220 X 180 X 120)", "\"Antistatic Pink Bubble Wrap 30\" 750mm x 100m", "Large Roll of Bubble Wrap 500mm x 100m",  "750mm x 100M Heavy Duty Brown Kraft Wrapping Paper", "Tubing, Polyethylene 6mm x 4mm - Natural 1m (IDMPE6/4N-1)", "Fitting - 4mm ID tube - Nylon Black (IDMFTLL025-2-10)", "Clamp 5-7mm Tube (IDM05-07-10)",
+            //    "Ferrule Set - Front & Rear 6mm (IDMIA760LS-SS-6-SET)", "Premium Wrist Strap - HCA10", "1.8m Long 6ft Stud to Stud - CCS10", "HP 117A Magenta Cartridge", "HP 117A Cyan Cartridge", "HP 117A Black Cartridge", "HP 117A Yellow Cartridge", "HP 913A Black Cartridge", "HP 913A Magenta Cartridge", "HP 913A Yellow Cartridge", "HP 913A Cyan Cartridge"
+            //};
+
+            //Array KBNumber = (Array)ws.Columns["D"].Cells.Value;
+            object[] KBNumberObj = { ws.Columns["D:D"].Value };
+            string[] KBNumberStr = (string[])KBNumberObj;
+            string result = Array.Find(KBNumberStr, element => element == row.Cells["PartNumber"].Value.ToString());
+
+            //Go to sheet 1 to get information for the below 'if' statement
+            ws1.Activate();
+
+            //Then see if the 'Current Stock' is less than or equal to the 'Re-order Point'
+            if (ws.Rows[result].Columns["W"] <= ws.Rows[result].Columns["T"])
+            {
+                //An email gets sent using Simple Mail Transfer Protocol
+
+                //Open SMTP client for Office 365
+                SmtpClient client = new SmtpClient();
+                {
+                    client.SetDefaults();
+                }
+
+                //Define email message
+                MailMessage message = new MailMessage();
+                {
+                    //Set from address
+                    message.From = new MailAddress(client.GetSenderEmail());
+
+                    message.To.Add("Gemmathomasgreen@effectphotonics.com");
+
+                    //Set subject and body
+                    message.Subject = "New order";
+                    message.Body =
+                        "This item: " + ws.Rows[result].Columns["A"].Value/*'Description'*/ +
+                        ", KB Number: " + ws.Rows[result].Columns["D"].Value/*'KB Number'*/ +
+                        " needs to be restocked by at least this amount: " +
+                        ws.Rows[result].Columns["T"].Value;//'Re-order Point'
+
+                    //Send message
+                    client.Send(message);
+                    MessageBox.Show("Email sent");
+                }
+            }
+            //Otherwise don't send message
+            MessageBox.Show("No email needs to be sent");
+
+            //If 'Current Stock' is more then don't send email and go back to sheet 3
+            ws3.Activate();
+        }
+        
+        public string ReadCell(int row, int coll)
+        {
+            //Increase from 0 to 1
+            row++;
+            coll++;
+
+            //If words in the cell ARE NOT null then write
+            if (ws.Cells[row, coll].Value2 != null)
+            {
+                return ws.Cells[row, coll].Value2;
+            }
+
+            else
+            {
+                //Otherwise you get this message
+                return "No value in this cell";
+            }
+        }
+
+        private void Clocktimer_Tick(object sender, EventArgs e)
+        {
+            DateTime datetime = DateTime.Now;
+            lblTimer.Text = datetime.ToString("dd/MM/yyyy - HH:mm:ss");
+
+            //If current time is 5pm then 
+            if (datetime == DateTime.Today.AddHours(17))
+            {
+                MessageBox.Show("Its time to do the daily export and save spreadsheet", "Daily export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //access ScanDataGrid_CellClick event
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //Check if there's data in the rows and user says 'No'
+            if (e.CloseReason == CloseReason.UserClosing && ScanDataGrid.Rows.Count > 1 && ScanDataGrid.Rows != null && !_closing)
+            {
+                e.Cancel = MessageBox.Show("Are you sure you want to exit?\nThere might be data that could be lost if you close?", "Close application", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No;
+            }
+
+            //Otherwise the Kanban app and Excel file closes
+            _closing = !e.Cancel;
+        //----------------------------------------------------------------------------------------------------------------------------------------
+            //Excel file closes when user presses 'X' icon when they open the Kanban app
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                //Close Excel file
+                excelApp.Workbooks.Close();
+
+                //Close Excel app
+                excelApp.Quit();
+            }
+        }
+    }
+}

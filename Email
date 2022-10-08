@@ -1,0 +1,136 @@
+using System;
+using System.Net.Mail;
+using System.Windows.Forms;
+using Microsoft.Office.Interop.Excel;
+using _Excel = Microsoft.Office.Interop.Excel;
+using _Application = Microsoft.Office.Interop.Excel._Application;
+
+namespace Email
+{
+    public partial class Email : Form
+    {
+        private _Application excelApp = new _Excel.Application();//Reference to app
+        private Workbook wb;//File opening
+        private Worksheet ws;//All sheets
+
+        public Email()
+        {
+            InitializeComponent();
+        }
+
+        private void Email_Load(object sender, EventArgs e)
+        {
+            Show();
+
+            //Set 'Date' columnn to show current date
+            ScanDataGrid.Columns["Date"].DefaultCellStyle.NullValue = DateTime.Now.ToString("dd/MM/yyyy");
+
+            //Open Excel file from app
+            wb = excelApp.Workbooks.Open(@"C:\Users\GemmaThomas-Green\OneDrive - EFFECT Photonics\Kanban project\Kanban Sheet NEW testing.xlsx");
+
+            TopMost = false;
+
+            MessageBox.Show("Excel file is open and ready...");
+
+            TopMost = true;
+
+            //See Excel spreadsheet
+            excelApp.Visible = true;
+
+            //Sheet 3
+            ws = wb.Worksheets[3];
+            ws.Activate();
+        }
+
+        private void ScanDataGrid_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            DataGridViewRow row = ScanDataGrid.Rows[e.RowIndex];
+
+            //Get the last used row
+            Range userRange = ws.UsedRange;
+            int LastRow = userRange.Rows.Count;
+            int add = LastRow + 1;
+
+            //If there is the default or more rows and no NULL values in the cells of first and third column of ScanDataGrid
+            if (e.RowIndex >= 0 && row.Cells["PartNumber"] != null && row.Cells["QuantityIssued"] != null)
+            {
+                try
+                {
+                    //'Part Number' column with last cell of Excel spreadsheet
+                    ws.Rows[add].Columns["A"] = row.Cells["PartNumber"].Value.ToString();
+
+                    //'Date' column with last cell of Excel spreadsheet
+                    ws.Rows[add].Columns["B"] = DateTime.Now.ToString("dd/MM/yyyy");
+                    //ws.Cells[add, 2].NumberFormat = ("dd/MM/yyyy");
+
+                    //'Quantity Issued' column with last cell of Excel spreadsheet
+                    ws.Rows[add].Columns["C"] = row.Cells["QuantityIssued"].Value.ToString();
+
+                    //Save Excel file
+                    wb.Save();
+                }
+
+                catch
+                {
+                    MessageBox.Show("You must enter a value in the cell", "Try again", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    TopMost = false;//MessageBox is on top
+                }
+            }
+            TopMost = true;//Kanban app is on top
+
+            //Save Excel file
+            wb.Save();
+            MessageBox.Show("Spreadsheet has been saved");
+
+            //---------------------------------------------------------------------------------------------------------------------------------------
+            var ws1 = wb.Worksheets[1];
+            var ws3 = wb.Worksheets[3];
+
+            //While the 'Part Number' in the ScanDataGrid value is the same as the last row in 'Material Issued' tab
+            object[] KBNumberObj = { ws.Columns["D:D"].Value };
+            string KBNumberStr = KBNumberObj.ToString();
+            string result = Array.Find(KBNumberStr, element => element == row.Cells["PartNumber"].Value.ToString()); 
+
+            //Go to sheet 1 to get information for the below 'if' statement
+            ws1.Activate();
+
+            //Then see if the 'Current Stock' is less than or equal to the 'Re-order Point'
+            if (ws.Rows[result].Columns["W"].Value <= ws.Rows[result].Columns["T"].Value)
+            {
+                //An email gets sent using Simple Mail Transfer Protocol
+
+                //Open SMTP client for Office 365
+                SmtpClient client = new SmtpClient();
+                {
+                    client.SetDefaults();
+                }
+
+                //Define email message
+                MailMessage message = new MailMessage();
+                {
+                    //Set from address
+                    message.From = new MailAddress(client.GetSenderEmail());
+
+                    message.To.Add("Gemmathomasgreen@effectphotonics.com");
+
+                    //Set subject and body
+                    message.Subject = "New order";
+                    message.Body =
+                         "This item: " + ws.Rows[result].Columns["A"].Value/*'Description'*/ +
+                         ", KB Number: " + ws.Rows[result].Columns["D"].Value/*'KB Number'*/ +
+                         " needs to be restocked by at least this amount: " +
+                         ws.Rows[result].Columns["T"].Value;//'Re-order Point'
+
+                    //Send message
+                    client.Send(message);
+                    MessageBox.Show("Email sent");
+                }
+            }
+            //Otherwise don't send message
+            MessageBox.Show("No email needs to be sent");
+
+            //If 'Current Stock' is more then don't send email and go back to sheet 3
+            ws3.Activate();
+        }
+    }
+}
